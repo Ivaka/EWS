@@ -1,0 +1,14 @@
+{
+  "name": "Exchange-EWS",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "i.papratilov@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "soap": "^0.9.1"
+  }
+}
