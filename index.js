@@ -15,6 +15,10 @@ function EWS(config) {
     this._endpoint = 'https://' + path.join(config.url, 'EWS/Exchange.asmx');
     this._exchangeVersoin = config.version || '2010';
 
+    /**
+     * TODO: Figure out a way to request the Services.wsdl, messages.xsd & types.xsd directly from the endpoint
+     * */
+
     this._services = path.join(__dirname, '/Services/Services.wsdl');
 
     this._soapClientOptions = {
@@ -39,7 +43,7 @@ EWS.prototype.connect = function connect (callback) {
         /**
          * TODO: Unhardcode exchage version in header
          * */
-        this._client.addSoapHeader('<t:RequestServerVersion Version="Exchange2010" />');
+        this._client.addSoapHeader('<t:RequestServerVersion Version="Exchange2010_SP2" />');
 
         callback(null, true);
     }.bind(this), this._endpoint);
@@ -78,6 +82,24 @@ EWS.prototype.FindItem = function (soapRequest, callback) {
         }
 
         return callback(new Error(results.ResponseMessages.FindItemResponseMessage.ResponseCode), results);
+    });
+};
+
+EWS.prototype.SyncFolderItems = function SyncFolderItems(soapRequest, callback) {
+    if (!callback || typeof callback !== 'function'){
+        callback = noop;
+    }
+
+    this._client.SyncFolderItems(soapRequest, function (err, results) {
+        if (err) {
+            return callback(err, null);
+        }
+
+        if (results.ResponseMessages.SyncFolderItemsResponseMessage.ResponseCode == 'NoError') {
+            return callback(null, results.ResponseMessages.SyncFolderItemsResponseMessage);
+        }
+
+        return callback(new Error(results.ResponseMessages.SyncFolderItemsResponseMessage.ResponseCode), results);
     });
 };
 
