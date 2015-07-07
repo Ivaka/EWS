@@ -1,9 +1,10 @@
 
 "use strict";
 
+var SoapRequest = require('./SoapRequest');
+
 function Message(service) {
     this._service = service;
-    this._serviceMethod = 'CreateItem';
     this._recipients = [];
 }
 
@@ -27,44 +28,36 @@ Message.prototype.addRecipient = function addRecipient(recipient) {
 };
 
 Message.prototype._sendSaveAction = function _sendSaveAction (callback) {
-    var soapObj = this._buildSoapRequest();
-    this._execute(soapObj, callback);
-};
-
-Message.prototype._buildSoapRequest = function _buildSoapRequest() {
-    return {
-            attributes: {
-                MessageDisposition: this._messageDisposition
-            },
-            Items: {
-                Message: {
-                    ItemClass: 'IPM.Note',
-                    Subject: this.Subject,
-                    Body: {
-                        attributes: {
-                            BodyType: 'HTML'
-                        },
-                        $value: this.Body
+    var soapRequest = new SoapRequest('CreateItem', {
+        attributes: {
+            MessageDisposition: this._messageDisposition
+        },
+        Items: {
+            Message: {
+                ItemClass: 'IPM.Note',
+                Subject: this.Subject,
+                Body: {
+                    attributes: {
+                        BodyType: 'HTML'
                     },
-                    ToRecipients: this._recipients.map(function (recipient) {
-                        return {
-                            Mailbox: {
-                                EmailAddress: recipient
-                            }
-                        }
-                    }),
-                    From: {
+                    $value: this.Body
+                },
+                ToRecipients: this._recipients.map(function (recipient) {
+                    return {
                         Mailbox: {
-                            EmailAddress: this.From
+                            EmailAddress: recipient
                         }
+                    }
+                }),
+                From: {
+                    Mailbox: {
+                        EmailAddress: this.From
                     }
                 }
             }
-        };
-};
-
-Message.prototype._execute = function (soapObj, callback) {
-    this._service.CreateItem(soapObj, callback);
+        }
+    });
+    this._service.execute(soapRequest, callback);
 };
 
 module.exports = Message;

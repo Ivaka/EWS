@@ -3,7 +3,8 @@
 var soap = require('soap'),
     path = require('path'),
     Message = require('./Message'),
-    Folder = require('./Folder');
+    Folder = require('./Folder'),
+    SoapRequest = require('./SoapRequest');
 
 var noop = function () {};
 var noopThrows = function (err) { if (err) {throw new Error(err)} };
@@ -35,6 +36,9 @@ EWS.prototype.connect = function connect (callback) {
 
         this._client = client;
         this._client.setSecurity(new soap.BasicAuthSecurity(this._username, this._password));
+        /**
+         * TODO: Unhardcode exchage version in header
+         * */
         this._client.addSoapHeader('<t:RequestServerVersion Version="Exchange2010" />');
 
         callback(null, true);
@@ -75,6 +79,10 @@ EWS.prototype.FindItem = function (soapRequest, callback) {
 
         return callback(new Error(results.ResponseMessages.FindItemResponseMessage.ResponseCode), results);
     });
+};
+
+EWS.prototype.execute = function execute(soapRequest, callback) {
+    this[soapRequest.getMethod()](soapRequest.getRequest(), callback);
 };
 
 EWS.prototype.Message = function () {

@@ -1,6 +1,6 @@
 "use strict";
 
-var ServiceConsumer = require('./ServiceConsumer');
+var SoapRequest = require('./SoapRequest');
 
 function _additionalFieldsMap(field) {
     return {
@@ -10,11 +10,13 @@ function _additionalFieldsMap(field) {
         };
 }
 
-Folder.prototype = Object.create(ServiceConsumer.prototype);
+/**
+ * TODO: Add method to append additional fields
+ * TODO: Add method to set override = true/false for additional fields
+ * */
 
 function Folder(service) {
-    ServiceConsumer.apply(this, arguments);
-    this._serviceMethod = 'FindItem';
+    this._service = service;
     this._defaultFields = [
         'item:ItemId',
         'item:DateTimeCreated',
@@ -27,6 +29,7 @@ function Folder(service) {
         'item:Subject',
         'item:DateTimeReceived'
     ];
+
     this._additionalFields = [
 
     ];
@@ -57,37 +60,34 @@ Folder.prototype.setBaseshape = function getBaseshape(baseShape) {
     return this;
 };
 
-Folder.prototype._buildSoapRequest = function () {
-    return {
-        attributes: {
-            Traversal: this._traversal
-        },
-        ItemShape: {
-            BaseShape: this._baseShape,
-            AdditionalProperties: {
-                FieldURI: this._overrideFields ? this._additionalFields.map(_additionalFieldsMap) : this._additionalFields.concat(this._defaultFields).map(_additionalFieldsMap)
-            }
-        },
-        IndexedPageItemView: {
+Folder.prototype.FindItems = function (callback) {
+    var soapRequest = new SoapRequest('FindItem',
+        {
             attributes: {
-                BasePoint: this._basePoint,
-                Offset: this._offset,
-                MaxEntriesReturned: this._maxEntriesReturned
-            }
-        },
-        ParentFolderIds: {
-            DistinguishedFolderId: {
+                Traversal: this._traversal
+            },
+            ItemShape: {
+                BaseShape: this._baseShape,
+                AdditionalProperties: {
+                    FieldURI: this._overrideFields ? this._additionalFields.map(_additionalFieldsMap) : this._additionalFields.concat(this._defaultFields).map(_additionalFieldsMap)
+                }
+            },
+            IndexedPageItemView: {
                 attributes: {
-                    Id: this._id
+                    BasePoint: this._basePoint,
+                    Offset: this._offset,
+                    MaxEntriesReturned: this._maxEntriesReturned
+                }
+            },
+            ParentFolderIds: {
+                DistinguishedFolderId: {
+                    attributes: {
+                        Id: this._id
+                    }
                 }
             }
-        }
-    };
-};
-
-Folder.prototype.FindItems = function (callback) {
-    var soapObj = this._buildSoapRequest();
-    this._execute(soapObj, callback);
+        });
+    this._service.execute(soapRequest, callback);
 };
 
 module.exports = Folder;
