@@ -1,5 +1,4 @@
-
-"use strict";
+use strict";
 
 var SoapRequest = require('./SoapRequest');
 
@@ -60,4 +59,43 @@ Message.prototype._sendSaveAction = function _sendSaveAction (callback) {
     this._service.execute(soapRequest, callback);
 };
 
+function Collection(service) {
+	this._service = service;
+}
+
+Collection.prototype.BindToItems = function (items) {
+	this._items = items;
+}
+
+Collection.prototype.Load = function (callback) {
+	var soapRequest = new SoapRequest('GetItem', {
+		ItemShape: {	
+			BaseShape: 'Default',
+			IncludeMimeContent: true
+		},
+		ItemIds: {
+			ItemId: this._items.map(function (item) { 
+					if (typeof item == 'string') {
+						return {
+							attributes: {
+								Id: item,
+								ChangeKey: ''
+							}
+						};
+					}
+					return {
+						attributes: {
+							Id: item.Id,
+							ChangeKey: item.ChangeKey || ''
+						}
+					}
+				})
+		}
+	});
+
+	this._service.execute(soapRequest, callback);
+};
+
+Message.prototype.Collection = Collection;
 module.exports = Message;
+
