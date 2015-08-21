@@ -9,6 +9,7 @@ var soap = require('soap'),
 var noop = function () {};
 var noopThrows = function (err) { if (err) {throw new Error(err)} };
 var _toString = Object.prototype.toString;
+var NO_ERROR = 'NoError';
 
 function EWS(config) {
     this._username = config.domain + '\\' + config.username;
@@ -17,8 +18,8 @@ function EWS(config) {
     this._exchangeVersoin = config.version || '2010';
 
     /**
- *      * TODO: Figure out a way to request the Services.wsdl, messages.xsd & types.xsd directly from the endpoint
- *           * */
+ *  *      * TODO: Figure out a way to request the Services.wsdl, messages.xsd & types.xsd directly from the endpoint
+ *   *           * */
 
     this._services = path.join(__dirname, '/Services/Services.wsdl');
 
@@ -42,8 +43,8 @@ EWS.prototype.connect = function connect (callback) {
         this._client = client;
         this._client.setSecurity(new soap.BasicAuthSecurity(this._username, this._password));
         /**
- *          * TODO: Unhardcode exchage version in header
- *                   * */
+ *  *          * TODO: Unhardcode exchage version in header
+ *   *                   * */
         this._client.addSoapHeader('<t:RequestServerVersion Version="Exchange2010_SP2" />');
 
         callback(null, true);
@@ -61,7 +62,7 @@ EWS.prototype.CreateItem = function (soapRequest, callback) {
             return callback(err, null);
         }
 
-        if (results.ResponseMessages.CreateItemResponseMessage.ResponseCode == 'NoError') {
+        if (results.ResponseMessages.CreateItemResponseMessage.ResponseCode == NO_ERROR) {
             return callback(null, results.ResponseMessages.CreateItemResponseMessage);
         }
 
@@ -78,7 +79,7 @@ EWS.prototype.FindItem = function (soapRequest, callback) {
             return callback(err, null);
         }
 
-        if (results.ResponseMessages.FindItemResponseMessage.ResponseCode == 'NoError') {
+        if (results.ResponseMessages.FindItemResponseMessage.ResponseCode == NO_ERROR) {
             return callback(null, results.ResponseMessages.FindItemResponseMessage);
         }
 
@@ -96,7 +97,7 @@ EWS.prototype.SyncFolderItems = function SyncFolderItems(soapRequest, callback) 
             return callback(err, null);
         }
 
-        if (results.ResponseMessages.SyncFolderItemsResponseMessage.ResponseCode == 'NoError') {
+        if (results.ResponseMessages.SyncFolderItemsResponseMessage.ResponseCode == NO_ERROR) {
             return callback(null, results.ResponseMessages.SyncFolderItemsResponseMessage);
         }
 
@@ -118,13 +119,17 @@ EWS.prototype.GetItem = function (soapRequest, callback) {
 
         if (_toString.call(results.ResponseMessages.GetItemResponseMessage) === '[object Array]' ) {
             errRes = results.ResponseMessages.GetItemResponseMessage.filter(function (message) {
-                return message.ResponseCode !== 'NoError';
+                return message.ResponseCode !== NO_ERROR;
             });
 
             noErrRes = results.ResponseMessages.GetItemResponseMessage.filter(function (message) {
-                return message.ResponseCode == 'NoError';
+                return message.ResponseCode == NO_ERROR;
             });
+        } else {
+            errRes = results.ResponseMessages.GetItemResponseMessage.ResponseCode == NO_ERROR ? [] : [results.ResponseMessages.GetItemResponseMessage];
+            noErrRes = results.ResponseMessages.GetItemResponseMessage.ResponseCode !== NO_ERROR ? [] : [results.ResponseMessages.GetItemResponseMessage];
         }
+
 
         if (!errRes.length) {
             return callback(err, noErrRes);
@@ -151,4 +156,5 @@ EWS.prototype.Folder = function () {
 };
 
 module.exports = EWS;
+
 
