@@ -139,6 +139,24 @@ EWS.prototype.GetItem = function (soapRequest, callback) {
     });
 }
 
+EWS.prototype.SyncFolderHierarchy = function (soapRequest, callback) {
+	if (!callback || typeof callback !== 'function') {
+		callback = noop;
+	}
+
+	this._client.SyncFolderHierarchy(soapRequest, function (err, results) {
+		if (err) {
+			return callback(err, null);
+		}
+
+		if (results.ResponseMessages.SyncFolderHierarchyResponseMessage.ResponseCode === NO_ERROR) {
+			return callback(null, results);
+		}
+
+		return callback(new Error(results.ResponseMessages.SyncFolderHierarchyResponseMessage.ResponseCode), results);
+	});
+};
+
 EWS.prototype.execute = function execute(soapRequest, callback) {
     this[soapRequest.getMethod()](soapRequest.getRequest(), callback);
 };
@@ -156,5 +174,4 @@ EWS.prototype.Folder = function () {
 };
 
 module.exports = EWS;
-
 

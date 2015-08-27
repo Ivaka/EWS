@@ -148,4 +148,35 @@ Folder.prototype.SyncFolderItems = function (callback) {
     }.bind(this));
 };
 
+Folder.prototype.SyncFolderHierarchy = function (callback) {
+	var pureSoapObject = {
+        FolderShape: {
+            BaseShape: 'AllProperties'
+        },
+        SyncFolderId: {
+            DistinguishedFolderId: {
+                attributes: {
+                    Id: this._id
+                }
+            }
+        }
+    };
+	if (this._syncState) {
+		pureSoapObject.SyncState = this._syncState;
+	}
+
+	var soapRequest = new SoapRequest('SyncFolderHierarchy', pureSoapObject);
+
+	this._service.execute(soapRequest, function (err, results) {
+		if (err) {
+			return callback(err);
+		}
+		if (results.ResponseCode === 'NoError') {
+			this._syncState = results.SyncState;
+		}
+
+		return callback(err, results);
+	}.bind(this));
+}
+
 module.exports = Folder;
