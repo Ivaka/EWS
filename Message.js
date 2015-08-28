@@ -5,7 +5,22 @@ var SoapRequest = require('./SoapRequest');
 function Message(service) {
     this._service = service;
     this._recipients = [];
+	this._id = null;
+	this._syncState = null;
+	this._defaultFields = [
+		'item:Attachments'		
+	];
+	this._additionalFields = [];
+	this._attachments = [];	
 }
+
+Message.prototype.Bind = function (id) {
+	this._id = id;
+};
+
+Message.prototype.setSyncState = function (syncState) {
+	this._syncState = syncState;
+};
 
 Message.prototype.SendAndSaveCopy = function SendAndSaveCopy (callback) {
     this._messageDisposition = 'SendAndSaveCopy';
@@ -59,19 +74,45 @@ Message.prototype._sendSaveAction = function _sendSaveAction (callback) {
     this._service.execute(soapRequest, callback);
 };
 
-function Collection(service) {
+Message.prototype.BindAttachment = function (attachment) {
+	this._attachments.push(attachment);
+	return this;	
+};
+
+Message.prototype.GetAttachments = function (callback) {
+	var attachmentsCollection = new AttachmentsCollection(this._service);
+	attachmentsCollection.BindToItems(this._attachments);
+	
+	attachmentsCollection.Load(function (err, results) {
+		if (!err) {
+			this.Attachments = results;
+		}
+
+		callback(err, results);
+	}.bind(this));
+};
+
+function MessageCollection(service) {
 	this._service = service;
+	this._defaultFields = [
+		'item:Attachments'
+	];
 }
 
-Collection.prototype.BindToItems = function (items) {
+MessageCollection.prototype.BindToItems = function (items) {
 	this._items = items;
 }
 
-Collection.prototype.Load = function (callback) {
+MessageCollection.prototype.Load = function (callback) {
 	var soapRequest = new SoapRequest('GetItem', {
 		ItemShape: {	
 			BaseShape: 'Default',
-			IncludeMimeContent: true
+			IncludeMimeContent: true,
+			AdditionalProperties: {
+				FieldURI: this._defaultFields.map(function (field) {
+					return { attributes: { FieldURI: field } };
+				})
+			}
 		},
 		ItemIds: {
 			ItemId: this._items.map(function (item) { 
@@ -92,10 +133,32 @@ Collection.prototype.Load = function (callback) {
 				})
 		}
 	});
-
 	this._service.execute(soapRequest, callback);
 };
 
-Message.prototype.Collection = Collection;
+function AttachmentCollection(service) {
+	this._service = service;
+	this._items = [];
+}
+
+AttachmentCollection.prototype.BindToItems = function (items) {
+	this._items = items;
+};
+
+AttachmentCollection.prototype.Load = function (callback) {
+	var soapRequest = new SoapRequest('GetAttachment', {
+		AttachmentIds: {
+			AttachmentId: this._items.map(function (attachment) {
+				return { attributes: attachment };
+			})
+		}
+	});
+	this._service.execute(soapRequest, callback);
+}
+
+
+Message.prototype.MessageCollection = MessageCollection;
+Message.prototype.AttachmentCollection  = AttachmentCollection;
+
 module.exports = Message;
 

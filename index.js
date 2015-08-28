@@ -157,6 +157,24 @@ EWS.prototype.SyncFolderHierarchy = function (soapRequest, callback) {
 	});
 };
 
+EWS.prototype.GetAttachment = function (soapRequest, callback) {
+	if (!callback || typeof callback !== 'function') {
+		callback = noop;
+	}
+	
+	this._client.GetAttachment(soapRequest, function (err, results) {
+		if (err) {
+			return callback(err, null);
+		}
+		
+		if (results.ResponseMessages.GetAttachmentResponseMessage.ResponseCode === NO_ERROR) {
+			return callback(null, results);
+		}
+
+		return callback(new Error(results.ResponseMessages.GetAttachmentResponseMessage.ResponseCode), results);
+	})
+}
+
 EWS.prototype.execute = function execute(soapRequest, callback) {
     this[soapRequest.getMethod()](soapRequest.getRequest(), callback);
 };
@@ -166,8 +184,12 @@ EWS.prototype.Message = function () {
 };
 
 EWS.prototype.MessageCollection = function () {
-	return new Message.prototype.Collection(this);
-}
+	return new Message.prototype.MessageCollection(this);
+};
+
+EWS.prototype.AttachmentCollection = function () {
+	return new Message.prototype.AttachmentCollection(this);
+};
 
 EWS.prototype.Folder = function () {
     return new Folder(this);
