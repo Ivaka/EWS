@@ -12,6 +12,7 @@ var _toString = Object.prototype.toString;
 var NO_ERROR = 'NoError';
 
 function EWS(config) {
+    console.log(this);
     this._username = config.domain + '\\' + config.username;
     this._password = config.password;
     this._endpoint = 'https://' + path.join(config.url, 'EWS/Exchange.asmx');
@@ -67,6 +68,40 @@ EWS.prototype.CreateItem = function (soapRequest, callback) {
         }
 
         return callback(new Error(results.ResponseMessages.CreateItemResponseMessage.ResponseCode), results);
+    });
+};
+
+EWS.prototype.CreateAttachment = function (soapRequest, callback) {
+    if (!callback || typeof callback !== 'function'){
+        callback = noop;
+    }
+    this._client.CreateAttachment(soapRequest, function (err, results) {
+        if (err) {
+            return callback(err, null);
+        }
+
+        if (results.ResponseMessages.CreateAttachmentResponseMessage.ResponseCode == NO_ERROR) {
+            return callback(null, results.ResponseMessages.CreateAttachmentResponseMessage);
+        }
+
+        return callback(new Error(results.ResponseMessages.CreateAttachmentResponseMessage.ResponseCode), results);
+    });
+};
+
+EWS.prototype.SendItem = function (soapRequest, callback) {
+    if (!callback || typeof callback !== 'function'){
+        callback = noop;
+    }
+    this._client.SendItem(soapRequest, function (err, results) {
+        if (err) {
+            return callback(err, null);
+        }
+
+        if (results.ResponseMessages.SendItemResponseMessage.ResponseCode == NO_ERROR) {
+            return callback(null, results.ResponseMessages.SendItemResponseMessage);
+        }
+
+        return callback(new Error(results.ResponseMessages.SendItemResponseMessage.ResponseCode), results);
     });
 };
 
@@ -140,39 +175,39 @@ EWS.prototype.GetItem = function (soapRequest, callback) {
 }
 
 EWS.prototype.SyncFolderHierarchy = function (soapRequest, callback) {
-	if (!callback || typeof callback !== 'function') {
-		callback = noop;
-	}
+    if (!callback || typeof callback !== 'function') {
+        callback = noop;
+    }
 
-	this._client.SyncFolderHierarchy(soapRequest, function (err, results) {
-		if (err) {
-			return callback(err, null);
-		}
+    this._client.SyncFolderHierarchy(soapRequest, function (err, results) {
+        if (err) {
+            return callback(err, null);
+        }
 
-		if (results.ResponseMessages.SyncFolderHierarchyResponseMessage.ResponseCode === NO_ERROR) {
-			return callback(null, results);
-		}
+        if (results.ResponseMessages.SyncFolderHierarchyResponseMessage.ResponseCode === NO_ERROR) {
+            return callback(null, results);
+        }
 
-		return callback(new Error(results.ResponseMessages.SyncFolderHierarchyResponseMessage.ResponseCode), results);
-	});
+        return callback(new Error(results.ResponseMessages.SyncFolderHierarchyResponseMessage.ResponseCode), results);
+    });
 };
 
 EWS.prototype.GetAttachment = function (soapRequest, callback) {
-	if (!callback || typeof callback !== 'function') {
-		callback = noop;
-	}
-	
-	this._client.GetAttachment(soapRequest, function (err, results) {
-		if (err) {
-			return callback(err, null);
-		}
-		
-		if (results.ResponseMessages.GetAttachmentResponseMessage.ResponseCode === NO_ERROR) {
-			return callback(null, results);
-		}
+    if (!callback || typeof callback !== 'function') {
+        callback = noop;
+    }
+    
+    this._client.GetAttachment(soapRequest, function (err, results) {
+        if (err) {
+            return callback(err, null);
+        }
+        
+        if (results.ResponseMessages.GetAttachmentResponseMessage.ResponseCode === NO_ERROR) {
+            return callback(null, results);
+        }
 
-		return callback(new Error(results.ResponseMessages.GetAttachmentResponseMessage.ResponseCode), results);
-	})
+        return callback(new Error(results.ResponseMessages.GetAttachmentResponseMessage.ResponseCode), results);
+    })
 }
 
 EWS.prototype.execute = function execute(soapRequest, callback) {
@@ -184,11 +219,11 @@ EWS.prototype.Message = function () {
 };
 
 EWS.prototype.MessageCollection = function () {
-	return new Message.prototype.MessageCollection(this);
+    return new Message.prototype.MessageCollection(this);
 };
 
 EWS.prototype.AttachmentCollection = function () {
-	return new Message.prototype.AttachmentCollection(this);
+    return new Message.prototype.AttachmentCollection(this);
 };
 
 EWS.prototype.Folder = function () {
