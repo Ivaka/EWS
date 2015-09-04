@@ -97,16 +97,21 @@ function MessageCollection(service) {
 	this._defaultFields = [
 		'item:Attachments'
 	];
+	this._baseShape = 'Default';
 }
 
 MessageCollection.prototype.BindToItems = function (items) {
 	this._items = items;
 }
 
+MessageCollection.prototype.setBaseShape = function (baseShape) {
+	this._baseShape = baseShape;
+};
+
 MessageCollection.prototype.Load = function (callback) {
 	var soapRequest = new SoapRequest('GetItem', {
 		ItemShape: {	
-			BaseShape: 'Default',
+			BaseShape: this._baseShape,
 			IncludeMimeContent: true,
 			AdditionalProperties: {
 				FieldURI: this._defaultFields.map(function (field) {
