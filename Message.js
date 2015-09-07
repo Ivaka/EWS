@@ -59,7 +59,6 @@ Message.prototype.sendItemAction = function _sendSaveAction (callback) {
 };
 
 Message.prototype._sendSaveAction = function _sendSaveAction (callback) {
-	console.log('_sendSaveAction');
     var soapRequest = new SoapRequest('CreateItem', {
         attributes: {
             MessageDisposition: this._messageDisposition
