@@ -149,34 +149,36 @@ Folder.prototype.SyncFolderItems = function (callback) {
 };
 
 Folder.prototype.SyncFolderHierarchy = function (callback) {
-	var pureSoapObject = {
+    var pureSoapObject = {
         FolderShape: {
             BaseShape: 'AllProperties'
-        },
-        SyncFolderId: {
+        }
+    };
+    if(this._id){
+        pureSoapObject.SyncFolderId =  {
             DistinguishedFolderId: {
                 attributes: {
                     Id: this._id
                 }
             }
+        };
+    }
+    if (this._syncState) {
+        pureSoapObject.SyncState = this._syncState;
+    }
+
+    var soapRequest = new SoapRequest('SyncFolderHierarchy', pureSoapObject);
+
+    this._service.execute(soapRequest, function (err, results) {
+        if (err) {
+            return callback(err);
         }
-    };
-	if (this._syncState) {
-		pureSoapObject.SyncState = this._syncState;
-	}
+        if (results.ResponseCode === 'NoError') {
+            this._syncState = results.SyncState;
+        }
 
-	var soapRequest = new SoapRequest('SyncFolderHierarchy', pureSoapObject);
-
-	this._service.execute(soapRequest, function (err, results) {
-		if (err) {
-			return callback(err);
-		}
-		if (results.ResponseCode === 'NoError') {
-			this._syncState = results.SyncState;
-		}
-
-		return callback(err, results);
-	}.bind(this));
-}
+        return callback(err, results);
+    }.bind(this));
+};
 
 module.exports = Folder;
