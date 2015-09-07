@@ -80,7 +80,7 @@ Message.prototype.BindAttachment = function (attachment) {
 };
 
 Message.prototype.GetAttachments = function (callback) {
-	var attachmentsCollection = new AttachmentsCollection(this._service);
+	var attachmentsCollection = new AttachmentCollection(this._service);
 	attachmentsCollection.BindToItems(this._attachments);
 	
 	attachmentsCollection.Load(function (err, results) {
