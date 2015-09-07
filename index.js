@@ -12,7 +12,6 @@ var _toString = Object.prototype.toString;
 var NO_ERROR = 'NoError';
 
 function EWS(config) {
-    console.log(this);
     this._username = config.domain + '\\' + config.username;
     this._password = config.password;
     this._endpoint = 'https://' + path.join(config.url, 'EWS/Exchange.asmx');
