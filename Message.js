@@ -41,6 +41,23 @@ Message.prototype.addRecipient = function addRecipient(recipient) {
     this._recipients.push(recipient);
 };
 
+Message.prototype.sendItemAction = function _sendSaveAction (callback) {
+    var soapRequest = new SoapRequest('SendItem', {
+    	attributes: {
+    		SaveItemToFolder: true
+    	},
+        ItemIds: {
+            ItemId: {
+		        attributes: {
+		            Id: this.ItemId,
+		            ChangeKey: this.ChangeKey		     
+		        }
+            }
+        }
+    });
+    this._service.execute(soapRequest, callback);
+};
+
 Message.prototype._sendSaveAction = function _sendSaveAction (callback) {
     var soapRequest = new SoapRequest('CreateItem', {
         attributes: {
@@ -48,6 +65,14 @@ Message.prototype._sendSaveAction = function _sendSaveAction (callback) {
         },
         Items: {
             Message: {
+            	Attachments: this._attachments.map(function (attachment) {
+            		return {
+            			FileAttachment: {
+            				Name: attachment.Name,
+            				IsInline: attachment.IsInline
+            			}
+            		};
+            	}),
                 ItemClass: 'IPM.Note',
                 Subject: this.Subject,
                 Body: {
@@ -71,12 +96,43 @@ Message.prototype._sendSaveAction = function _sendSaveAction (callback) {
             }
         }
     });
+
     this._service.execute(soapRequest, callback);
 };
 
 Message.prototype.BindAttachment = function (attachment) {
 	this._attachments.push(attachment);
 	return this;	
+};
+
+Message.prototype.CreateAttachment = function (callback) {
+	var soapRequest = new SoapRequest('CreateAttachment', {
+        ParentItemId: {
+	        attributes: {
+	            Id: this.ItemId
+	        }
+        },
+        Attachments: this._attachments.map(function (attachment) {
+        	if (attachment.isInline) {
+	        	return {
+	        		FileAttachment: {
+	        			Name: attachment.name,
+	        			Content: attachment.content,
+	        			IsInline: attachment.isInline,
+	        			ContentId: attachment.ContentId
+	        		}
+	        	};
+        	} else {
+	        	return {
+	        		FileAttachment: {
+	        			Name: attachment.name,
+	        			Content: attachment.content
+	        		}
+	        	};
+        	}
+        })
+    });
+    this._service.execute(soapRequest, callback);
 };
 
 Message.prototype.GetAttachments = function (callback) {
