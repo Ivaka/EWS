@@ -6,9 +6,18 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "i.papratilov@gmail.com",
+  "author": {
+    "name": "i.papratilov@gmail.com"
+  },
   "license": "MIT",
   "dependencies": {
     "soap": "^0.9.1"
-  }
+  },
+  "gitHead": "82f5ec4e5cf78c20f1bc012ef075907b08151ef2",
+  "readme": "# EWS\n",
+  "readmeFilename": "README.md",
+  "_id": "Exchange-EWS@0.1.0",
+  "_shasum": "018715df4cae026aa1c7617c6ecdc9dd38705eb2",
+  "_from": "git://github.com/Ivaka/EWS.git",
+  "_resolved": "git://github.com/Ivaka/EWS.git#82f5ec4e5cf78c20f1bc012ef075907b08151ef2"
 }
