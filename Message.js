@@ -105,47 +105,6 @@ Message.prototype.BindAttachment = function (attachment) {
 	return this;	
 };
 
-Message.prototype.GetAttachmentInline = function (attachment) {
-
-	return [
-		{
-			Name: this._attachments[0].name,
-			ContentId: this._attachments[0].name,
-			IsInline: true,
-			IsContactPhoto: false,
-			Content: this._attachments[0].content
-		},
-		{
-			Name: this._attachments[1].name,
-			ContentId: this._attachments[1].name,
-			IsInline: true,
-			IsContactPhoto: false,
-			Content: this._attachments[1].content
-		}
-	];
-};
-
-/*this._attachments.map(function (attachment) {
-        	if (attachment.isInline) {
-	        	return {
-	        		FileAttachment: {
-	        			Name: attachment.name,
-	        			ContentId: attachment.ContentId,
-	        			IsInline: true,
-	        			IsContactPhoto: false,
-	        			Content: attachment.content
-	        		}
-	        	};
-        	} else {
-	        	return {
-	        		FileAttachment: {
-	        			Name: attachment.name,
-	        			Content: attachment.content
-	        		}
-	        	};
-        	}
-        })*/
-
 Message.prototype.CreateAttachment = function (callback) {
 	var soapRequest = new SoapRequest('CreateAttachment', {
         ParentItemId: {
@@ -154,7 +113,22 @@ Message.prototype.CreateAttachment = function (callback) {
 	        }
         },
         Attachments: {
-        	FileAttachment: this.GetAttachmentInline()
+        	FileAttachment: this._attachments.map(function (file) {
+        		if (file.isInline) {
+		        	return {
+	        			Name: file.name,
+	        			ContentId: file.ContentId,
+	        			IsInline: true,
+	        			IsContactPhoto: false,
+	        			Content: file.content
+		        	};
+	        	} else {
+	        		return {
+	        			Name: file.name,
+	        			Content: file.content
+		        	};
+	        	}
+        	})
         } 
     });
     this._service.execute(soapRequest, callback);
