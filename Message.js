@@ -65,14 +65,14 @@ Message.prototype._sendSaveAction = function _sendSaveAction (callback) {
         },
         Items: {
             Message: {
-            	Attachments: {
-					FileAttachment: this._attachments.map(function (attachment) {
-						return {
-							Name: attachment.Name,
-							IsInline: attachment.IsInline,
-						};
-					})
-				},				
+            	Attachments: this._attachments.map(function (attachment) {
+            		return {
+            			FileAttachment: {
+            				Name: attachment.Name,
+            				IsInline: attachment.IsInline
+            			}
+            		};
+            	}),
                 ItemClass: 'IPM.Note',
                 Subject: this.Subject,
                 Body: {
