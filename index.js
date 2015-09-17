@@ -46,7 +46,7 @@ EWS.prototype.connect = function connect (callback) {
         /**
  *  *          * TODO: Unhardcode exchage version in header
  *   *                   * */
-        this._client.addSoapHeader('<t:RequestServerVersion Version="Exchange2010" />');
+        this._client.addSoapHeader('<t:RequestServerVersion Version="Exchange' + this._exchangeVersion + '" />');
 
         callback(null, true);
     }.bind(this), this._endpoint);
