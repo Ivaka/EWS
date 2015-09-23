@@ -113,22 +113,23 @@ Message.prototype.CreateAttachment = function (callback) {
 	        }
         },
         Attachments: {
-			FileAttachment: this._attachments.map(function (attachment) {
-				if (attachment.isInline) {
-					return {
-	        			Name: attachment.name,
-	        			Content: attachment.content,
-	        			IsInline: attachment.isInline,
-	        			ContentId: attachment.ContentId
-					};
-				} else {
-					return {
-	        			Name: attachment.name,
-	        			Content: attachment.content
-					};
-				}
-			})
-		}
+        	FileAttachment: this._attachments.map(function (file) {
+        		if (file.isInline) {
+		        	return {
+	        			Name: file.name,
+	        			ContentId: file.ContentId,
+	        			IsInline: true,
+	        			IsContactPhoto: false,
+	        			Content: file.content
+		        	};
+	        	} else {
+	        		return {
+	        			Name: file.name,
+	        			Content: file.content
+		        	};
+	        	}
+        	})
+        } 
     });
     this._service.execute(soapRequest, callback);
 };
