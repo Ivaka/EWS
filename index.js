@@ -4,7 +4,9 @@ var soap = require('soap'),
     path = require('path'),
     Message = require('./Message'),
     Folder = require('./Folder'),
-    SoapRequest = require('./SoapRequest');
+    SoapRequest = require('./SoapRequest'),
+	ExtendedProperty = require('./ExtendedProperty'),
+	MapiPropertyType = require('./MapiPropertyType');	
 
 var noop = function () {};
 var noopThrows = function (err) { if (err) {throw new Error(err)} };
@@ -12,7 +14,6 @@ var _toString = Object.prototype.toString;
 var NO_ERROR = 'NoError';
 
 function EWS(config) {
-    console.log(this);
     this._username = config.domain + '\\' + config.username;
     this._password = config.password;
     this._endpoint = 'https://' + path.join(config.url, 'EWS/Exchange.asmx');
@@ -229,6 +230,9 @@ EWS.prototype.AttachmentCollection = function () {
 EWS.prototype.Folder = function () {
     return new Folder(this);
 };
+
+EWS.prototype.ExtendedProperty = ExtendedProperty;
+EWS.prototype.MapiPropertyType = MapiPropertyType;
 
 module.exports = EWS;
 
