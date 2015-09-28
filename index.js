@@ -66,8 +66,8 @@ EWS.prototype.CreateItem = function (soapRequest, callback) {
         if (results.ResponseMessages.CreateItemResponseMessage.ResponseCode == NO_ERROR) {
             return callback(null, results.ResponseMessages.CreateItemResponseMessage);
         }
-
-        return callback(new Error(results.ResponseMessages.CreateItemResponseMessage.ResponseCode), results);
+    
+	    return callback(new Error(results.ResponseMessages.CreateItemResponseMessage.ResponseCode), results);
     });
 };
 

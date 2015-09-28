@@ -11,7 +11,8 @@ function Message(service) {
 		'item:Attachments'		
 	];
 	this._additionalFields = [];
-	this._attachments = [];	
+	this._attachments = [];
+	this._extendedProperties = [];
 }
 
 Message.prototype.Bind = function (id) {
@@ -59,7 +60,7 @@ Message.prototype.sendItemAction = function _sendSaveAction (callback) {
 };
 
 Message.prototype._sendSaveAction = function _sendSaveAction (callback) {
-    var soapRequest = new SoapRequest('CreateItem', {
+    var soapObj = {
         attributes: {
             MessageDisposition: this._messageDisposition
         },
@@ -80,23 +81,30 @@ Message.prototype._sendSaveAction = function _sendSaveAction (callback) {
                         BodyType: 'HTML'
                     },
                     $value: this.Body
-                },
-                ToRecipients: this._recipients.map(function (recipient) {
-                    return {
-                        Mailbox: {
-                            EmailAddress: recipient
-                        }
-                    }
-                }),
-                From: {
-                    Mailbox: {
-                        EmailAddress: this.From
-                    }
                 }
             }
         }
-    });
+    };
+	
+	if (this._extendedProperties.length) {
+		soapObj.Items.Message.ExtendedProperty = this._extendedProperties.map(function (prop) {return prop.toJSON()});
+	}
+	
+	soapObj.Items.Message.ToRecipients = this._recipients.map(function (recipient) {
+		return {
+			Mailbox: {
+				EmailAddress: recipient
+			}
+		};
+	});
 
+	soapObj.Items.Message.From = {
+		Mailbox: {
+			EmailAddress: this.From
+		}
+	};
+
+	var soapRequest = new SoapRequest('CreateItem', soapObj);
     this._service.execute(soapRequest, callback);
 };
 
@@ -145,6 +153,11 @@ Message.prototype.GetAttachments = function (callback) {
 
 		callback(err, results);
 	}.bind(this));
+};
+
+Message.prototype.addExtendedProperty = function (property) {
+	this._extendedProperties.push(property);
+	return this;
 };
 
 function MessageCollection(service) {
