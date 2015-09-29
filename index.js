@@ -6,7 +6,8 @@ var soap = require('soap'),
     Folder = require('./Folder'),
     SoapRequest = require('./SoapRequest'),
 	ExtendedProperty = require('./ExtendedProperty'),
-	MapiPropertyType = require('./MapiPropertyType');	
+	MapiPropertyType = require('./MapiPropertyType'),
+	DistinguishedPropertySet = require('./DistinguishedPropertySet');
 
 var noop = function () {};
 var noopThrows = function (err) { if (err) {throw new Error(err)} };
@@ -233,6 +234,7 @@ EWS.prototype.Folder = function () {
 
 EWS.prototype.ExtendedProperty = ExtendedProperty;
 EWS.prototype.MapiPropertyType = MapiPropertyType;
+EWS.prototype.DistinguishedPropertySet = DistinguishedPropertySet;
 
 module.exports = EWS;
 

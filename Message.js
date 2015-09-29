@@ -166,6 +166,12 @@ function MessageCollection(service) {
 		'item:Attachments'
 	];
 	this._baseShape = 'Default';
+	this._extendedProperties = [];
+}
+
+MessageCollection.prototype.addExtendedProperty = function (property) {
+	this._extendedProperties.push(property);
+	return this;
 }
 
 MessageCollection.prototype.BindToItems = function (items) {
@@ -177,7 +183,7 @@ MessageCollection.prototype.setBaseShape = function (baseShape) {
 };
 
 MessageCollection.prototype.Load = function (callback) {
-	var soapRequest = new SoapRequest('GetItem', {
+	var soapObj = {
 		ItemShape: {	
 			BaseShape: this._baseShape,
 			IncludeMimeContent: true,
@@ -205,7 +211,13 @@ MessageCollection.prototype.Load = function (callback) {
 					}
 				})
 		}
-	});
+	};
+	if (this._extendedProperties.length) {
+		soapObj.ItemShape.AdditionalProperties.ExtendedFieldURI = this._extendedProperties.map(function (property) {
+			return {attributes:  property.getAttributes() };
+		})
+	}
+	var soapRequest = new SoapRequest('GetItem', soapObj);
 	this._service.execute(soapRequest, callback);
 };
 
