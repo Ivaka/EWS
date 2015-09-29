@@ -43,7 +43,7 @@ ExtendedProperty.prototype.getType = function () {
 };
 
 ExtendedProperty.prototype.getUUID = function () {
-	return thus._uuid;
+	return this._uuid;
 };
 
 ExtendedProperty.prototype.toJSON = function () {
