@@ -41,6 +41,7 @@ function Folder(service) {
     this._maxEntriesReturned = 10;
     this._id = 'inbox';
     this._syncState = null;
+	this._distinguished = true;
 }
 
 Folder.prototype.setTraversal = function setTraversal(traversal) {
@@ -61,7 +62,10 @@ Folder.prototype.setBaseshape = function getBaseshape(baseShape) {
     return this;
 };
 
-Folder.prototype.Bind = function Bind(id) {
+Folder.prototype.Bind = function Bind(id, distinguished) {
+	if (!distinguished) {
+		this._distinguished = distinguished;
+	}
     this._id = id;
     return this;
 };
@@ -85,8 +89,7 @@ Folder.prototype.getSyncState = function getSyncState() {
 };
 
 Folder.prototype.FindItems = function (callback) {
-    var soapRequest = new SoapRequest('FindItem',
-        {
+    var soapRequest =  {
             attributes: {
                 Traversal: this._traversal
             },
@@ -102,15 +105,24 @@ Folder.prototype.FindItems = function (callback) {
                     Offset: this._offset,
                     MaxEntriesReturned: this._maxEntriesReturned
                 }
-            },
-            ParentFolderIds: {
-                DistinguishedFolderId: {
-                    attributes: {
-                        Id: this._id
-                    }
-                }
-            }
-        });
+			}
+        };
+
+	if (!this._distinguished) {
+		soapRequest.ParentFolderIds = {
+			FolderId: {
+				attributes: { Id: this._id}
+			}
+		};
+	} else {
+		soapRequest.ParentFolderIds = {
+			DistinguishedFolderId: {
+				attributes: { Id: this._id}
+			}
+		};
+	}
+
+	var soapRequest = new SoapRequest('FindItem', soapObj);
     this._service.execute(soapRequest, callback);
 };
 
@@ -118,15 +130,22 @@ Folder.prototype.SyncFolderItems = function (callback) {
     var pureSoapObject = {
             ItemShape: {
                 BaseShape: this._baseShape
-            },
-            SyncFolderId: {
-                DistinguishedFolderId: {
-                    attributes: {
-                        Id: this._id
-                    }
-                }
             }
         };
+	if (!this._distinguished) {
+		soapRequest.SyncFolderId = {
+			FolderId: {
+				attributes: { Id: this._id}
+			}
+		};
+	} else {
+		soapRequest.SyncFolderId = {
+			DistinguishedFolderId: {
+				attributes: { Id: this._id}
+			}
+		};
+	}
+	
     if (this._syncState) {
         pureSoapObject.SyncState = this._syncState;
     }
@@ -155,14 +174,26 @@ Folder.prototype.SyncFolderHierarchy = function (callback) {
         }
     };
     if(this._id){
-        pureSoapObject.SyncFolderId =  {
-            DistinguishedFolderId: {
-                attributes: {
-                    Id: this._id
-                }
-            }
-        };
-    }
+		if (!this._distinguished) {
+				pureSoapObject.SyncFolderId =  {
+					FolderId: {
+						attributes: {
+							Id: this._id
+						}
+					}
+				};
+
+		} else {
+				pureSoapObject.SyncFolderId =  {
+					DistinguishedFolderId: {
+						attributes: {
+							Id: this._id
+						}
+					}
+				};
+		}
+	}   
+
     if (this._syncState) {
         pureSoapObject.SyncState = this._syncState;
     }
