@@ -63,7 +63,7 @@ Folder.prototype.setBaseshape = function getBaseshape(baseShape) {
 };
 
 Folder.prototype.Bind = function Bind(id, distinguished) {
-	if (!distinguished) {
+	if (distinguished === false) {
 		this._distinguished = distinguished;
 	}
     this._id = id;
@@ -89,7 +89,7 @@ Folder.prototype.getSyncState = function getSyncState() {
 };
 
 Folder.prototype.FindItems = function (callback) {
-    var soapRequest =  {
+    var soapObj =  {
             attributes: {
                 Traversal: this._traversal
             },
@@ -109,13 +109,13 @@ Folder.prototype.FindItems = function (callback) {
         };
 
 	if (!this._distinguished) {
-		soapRequest.ParentFolderIds = {
+		soapObj.ParentFolderIds = {
 			FolderId: {
 				attributes: { Id: this._id}
 			}
 		};
 	} else {
-		soapRequest.ParentFolderIds = {
+		soapObj.ParentFolderIds = {
 			DistinguishedFolderId: {
 				attributes: { Id: this._id}
 			}
@@ -133,13 +133,13 @@ Folder.prototype.SyncFolderItems = function (callback) {
             }
         };
 	if (!this._distinguished) {
-		soapRequest.SyncFolderId = {
+		pureSoapObject.SyncFolderId = {
 			FolderId: {
 				attributes: { Id: this._id}
 			}
 		};
 	} else {
-		soapRequest.SyncFolderId = {
+		pureSoapObject.SyncFolderId = {
 			DistinguishedFolderId: {
 				attributes: { Id: this._id}
 			}
