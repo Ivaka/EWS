@@ -13,6 +13,7 @@ function Message(service) {
 	this._additionalFields = [];
 	this._attachments = [];
 	this._extendedProperties = [];
+	this._inReplyTo = null;
 }
 
 Message.prototype.Bind = function (id) {
@@ -40,6 +41,78 @@ Message.prototype.Save = function Save (callback) {
 
 Message.prototype.addRecipient = function addRecipient(recipient) {
     this._recipients.push(recipient);
+};
+
+Message.prototype.setReplyTo = function setReplyTo(id, changeKey) {
+	this._inReplyTo = {
+		Id: id
+	};
+
+	if (changeKey) {
+		this._inReplyTo.ChangeKey = changeKey;
+	}
+
+	return this;
+};
+
+Message.prototype.ReplyTo = function ReplyTo(callback) {
+	var self = this,
+		messageCollection = null;
+	if (!this._inReplyTo.ChangeKey) {
+		messageCollection = new MessageCollection(this._service);
+		messageCollection.BindToItems([this._inReplyTo.Id]);
+
+		messageCollection.Load(function (err, results) {
+			if (err) {
+				return callback(err, null);
+			}
+
+			self._inReplyTo.ChangeKey = results[0].Items.Message.ItemId.attributes.ChangeKey;
+			
+			var soapRequest = new SoapRequest('CreateItem',	{
+				attributes: {
+					MessageDisposition: 'SendAndSaveCopy'
+				},
+				Items: {
+					ReplyToItem: {
+						ReferenceItemId: {
+							attributes: self._inReplyTo
+						},
+						NewBodyContent: {
+							attributes: {
+								BodyType: 'HTML'
+							},
+							$value: self.Body
+						}
+					}			
+				}
+			});
+
+			self._service.execute(soapRequest, callback);
+		});
+	} else {
+		
+			var soapRequest = new SoapRequest('CreateItem',	{
+				attributes: {
+					MessageDisposition: 'SendAndSaveCopy'
+				},
+				Items: {
+					ReplyToItem: {
+						ReferenceItemId: {
+							attributes: self._inReplyTo
+						},
+						NewBodyContent: {
+							attributes: {
+								BodyType: 'HTML'
+							},
+							$value: self.Body
+						}
+					}			
+				}
+			});
+
+			self._service.execute(soapRequest, callback);
+	}
 };
 
 Message.prototype.sendItemAction = function _sendSaveAction (callback) {
@@ -195,20 +268,17 @@ MessageCollection.prototype.Load = function (callback) {
 		},
 		ItemIds: {
 			ItemId: this._items.map(function (item) { 
+					var _item = {};
 					if (typeof item == 'string') {
-						return {
-							attributes: {
-								Id: item,
-								ChangeKey: ''
-							}
-						};
+						_item.attributes = {Id: item};
+						return _item;
 					}
-					return {
-						attributes: {
-							Id: item.Id,
-							ChangeKey: item.ChangeKey || ''
-						}
+					_item.attributes = {Id: item.Id};
+					if (item.ChangeKey != '') {
+						_item.attributes.ChangeKey = item.ChangeKey;
 					}
+					return _item;
+					
 				})
 		}
 	};
