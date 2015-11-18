@@ -5,6 +5,8 @@ var SoapRequest = require('./SoapRequest');
 function Message(service) {
     this._service = service;
     this._recipients = [];
+	this._cc_recipients = [];
+	this._bcc_recipients = [];
 	this._id = null;
 	this._syncState = null;
 	this._defaultFields = [
@@ -42,6 +44,13 @@ Message.prototype.Save = function Save (callback) {
 Message.prototype.addRecipient = function addRecipient(recipient) {
     this._recipients.push(recipient);
 };
+
+Message.prototype.addCCRecipient = function addCCRecipient(recipient) {
+	this._cc_recipients.push(recipient);
+}
+Message.prototype.addBCCRecipient = function addCCRecipient(recipient) {
+	this._bcc_recipients.push(recipient);
+}
 
 Message.prototype.setReplyTo = function setReplyTo(id, changeKey) {
 	this._inReplyTo = {
@@ -162,14 +171,30 @@ Message.prototype._sendSaveAction = function _sendSaveAction (callback) {
 	if (this._extendedProperties.length) {
 		soapObj.Items.Message.ExtendedProperty = this._extendedProperties.map(function (prop) {return prop.toJSON()});
 	}
-	
-	soapObj.Items.Message.ToRecipients = this._recipients.map(function (recipient) {
+	soapObj.Items.Message.ToRecipients = {};
+	soapObj.Items.Message.ToRecipients.Mailbox = this._recipients.map(function (recipient) {
 		return {
-			Mailbox: {
-				EmailAddress: recipient
-			}
+			EmailAddress: recipient
 		};
 	});
+
+	if (this._cc_recipients.length) {
+		soapObj.Items.Message.CcRecipients = {};
+		soapObj.Items.Message.CcRecipients.Mailbox = this._cc_recipients.map(function (recipient) {
+			return {
+				EmailAddress: recipient
+			};
+		});
+	}
+
+	if (this._bcc_recipients.length) {
+		soapObj.Items.Message.BccRecipients = {};
+		soapObj.Items.Message.BccRecipients.Mailbox = this._bcc_recipients.map(function (recipient) {
+			return {
+				EmailAddress: recipient
+			};
+		});
+	}
 
 	soapObj.Items.Message.From = {
 		Mailbox: {
@@ -316,4 +341,5 @@ Message.prototype.MessageCollection = MessageCollection;
 Message.prototype.AttachmentCollection  = AttachmentCollection;
 
 module.exports = Message;
+
 
