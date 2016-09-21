@@ -2,6 +2,7 @@
 
 module.exports = {
 	'STRING': 'String',
+	'INTEGER':'Integer',
 	'ApplicationTime': 'ApplicationTime',
 	'Binary': 'Binary',
 	'BinaryArray': 'BinaryArray',
@@ -15,7 +16,7 @@ module.exports = {
 	'Error': 'Error',
 	'Float': 'Float',
 	'FloatArray': 'FloatArray',
-	'Integer': 'IntegerArray',
+	'INTEGER_ARRAY': 'IntegerArray',
 	'Long': 'Long',
 	'LongArray': 'LongArray',
 	'Null': 'Null',

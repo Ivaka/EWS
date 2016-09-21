@@ -3,9 +3,11 @@
 var uuid = require('node-uuid'),
 	MapiPropertyType = require('./MapiPropertyType');
 
-function ExtendedProperty(propertyName, value, propertyType, distinguishedPropertySetId) {
+function ExtendedProperty(propertyName, value, propertyType, distinguishedPropertySetId, guid) {
 	if (distinguishedPropertySetId) {
 		this._distinguishedPropertySetId = distinguishedPropertySetId;
+	}if (guid) {
+		this._uuid = guid;
 	} else {
 		this._uuid = uuid.v4();
 	}
