@@ -3,18 +3,22 @@
 var uuid = require('node-uuid'),
 	MapiPropertyType = require('./MapiPropertyType');
 
-function ExtendedProperty(propertyName, value, propertyType, distinguishedPropertySetId, guid) {
-	if (distinguishedPropertySetId) {
-		this._distinguishedPropertySetId = distinguishedPropertySetId;
-	}if (guid) {
-		this._uuid = guid;
-	} else {
-		this._uuid = uuid.v4();
-	}
+function ExtendedProperty(propertyName, value, propertyType, distinguishedPropertySetId, guid, tag) {
+	if(tag){
+		this._tag = tag;
+	}else{
+		if (distinguishedPropertySetId) {
+			this._distinguishedPropertySetId = distinguishedPropertySetId;
+		}if (guid) {
+			this._uuid = guid;
+		} else {
+			this._uuid = uuid.v4();
+		}
 
-	this._name = propertyName || '';
+		this._name = propertyName || '';
+		this._value = value || '';
+	}
 	this._type = propertyType || MapiPropertyType.STRING;
-	this._value = value || '';
 }
 
 ExtendedProperty.prototype.setName = function (name) {
@@ -61,14 +65,19 @@ ExtendedProperty.prototype.toJSON = function () {
 
 ExtendedProperty.prototype.getAttributes = function () {
 	var attributes = {};
-	if (this._uuid) {
-		attributes.PropertySetId = this._uuid;
-	} else if (this._distinguishedPropertySetId) {
-		attributes.DistinguishedPropertySetId = this._distinguishedPropertySetId;
+
+	if(this._tag){
+		attributes.PropertyTag = this._tag
+	}else{
+		if (this._uuid) {
+			attributes.PropertySetId = this._uuid;
+		} else if (this._distinguishedPropertySetId) {
+			attributes.DistinguishedPropertySetId = this._distinguishedPropertySetId;
+		}
+		attributes.PropertyName = this._name;
 	}
 	attributes.PropertyType = this._type;
-	attributes.PropertyName = this._name;
-
+	
 	return attributes;
 };
 
