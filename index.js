@@ -15,7 +15,7 @@ var _toString = Object.prototype.toString;
 var NO_ERROR = 'NoError';
 
 function EWS(config) {
-    this._username = config.domain + '\\' + config.username;
+    this._username = config.domain ? config.domain + '\\' + config.username : config.username;
     this._password = config.password;
     this._endpoint = 'https://' + path.join(config.url, 'EWS/Exchange.asmx');
     this._exchangeVersoin = config.version || '2010';
@@ -45,10 +45,7 @@ EWS.prototype.connect = function connect (callback) {
 
         this._client = client;
         this._client.setSecurity(new soap.BasicAuthSecurity(this._username, this._password));
-        /**
- *  *          * TODO: Unhardcode exchage version in header
- *   *                   * */
-        this._client.addSoapHeader('<t:RequestServerVersion Version="Exchange2010_SP2" />');
+		this._client.addSoapHeader('<t:RequestServerVersion Version="Exchange' + this._exchangeVersoin + '" />');
 
         callback(null, true);
     }.bind(this), this._endpoint);
