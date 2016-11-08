@@ -151,7 +151,7 @@ Folder.prototype.SyncFolderItems = function (callback) {
     }
 
     pureSoapObject.MaxChangesReturned = this._maxEntriesReturned;
-    pureSoapObject.SyncScope = 'NormalItems';
+    //pureSoapObject.SyncScope = 'NormalItems';
 
     var soapRequest = new SoapRequest('SyncFolderItems', pureSoapObject);
 
