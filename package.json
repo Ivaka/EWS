@@ -12,13 +12,14 @@
   "license": "MIT",
   "dependencies": {
     "node-uuid": "^1.4.3",
-    "soap": "^0.9.1"
+    "soap-ntlm-2": "^0.9.4"
   },
   "gitHead": "82f5ec4e5cf78c20f1bc012ef075907b08151ef2",
   "readme": "# EWS\n",
   "readmeFilename": "README.md",
   "_id": "Exchange-EWS@0.1.0",
-  "_shasum": "018715df4cae026aa1c7617c6ecdc9dd38705eb2",
+  "_shasum": "d42f1ffe7541a18a036ac91fd684ba5e9ccf0a73",
   "_from": "git://github.com/Ivaka/EWS.git",
-  "_resolved": "git://github.com/Ivaka/EWS.git#82f5ec4e5cf78c20f1bc012ef075907b08151ef2"
+  "_resolved": "git://github.com/Ivaka/EWS.git#23e6a132913fcb8ae7e8be14e37a3b0c87bf2e9a",
+  "_fromGithub": true
 }

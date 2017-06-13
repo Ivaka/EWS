@@ -1,13 +1,13 @@
 "use strict";
 
-var soap = require('soap'),
+var soap = require('soap-ntlm-2'),
     path = require('path'),
     Message = require('./Message'),
     Folder = require('./Folder'),
     SoapRequest = require('./SoapRequest'),
-	ExtendedProperty = require('./ExtendedProperty'),
-	MapiPropertyType = require('./MapiPropertyType'),
-	DistinguishedPropertySet = require('./DistinguishedPropertySet');
+    ExtendedProperty = require('./ExtendedProperty'),
+    MapiPropertyType = require('./MapiPropertyType'),
+    DistinguishedPropertySet = require('./DistinguishedPropertySet');
 
 var noop = function () {};
 var noopThrows = function (err) { if (err) {throw new Error(err)} };
@@ -19,6 +19,7 @@ function EWS(config) {
     this._password = config.password;
     this._endpoint = 'https://' + path.join(config.url, 'EWS/Exchange.asmx');
     this._exchangeVersoin = config.version || '2010';
+    this.ntlm = config.ntlm;
 
     /**
  *  *      * TODO: Figure out a way to request the Services.wsdl, messages.xsd & types.xsd directly from the endpoint
@@ -32,6 +33,15 @@ function EWS(config) {
             override: true
         }
     };
+    if(config.ntlm){
+        this._soapClientOptions.wsdl_options = {
+            ntlm: true,
+            username: config.username,
+            password:  this._password,
+            workstation: "",
+            domain: config.domain
+        }
+    }
 }
 
 EWS.prototype.connect = function connect (callback) {
@@ -44,8 +54,12 @@ EWS.prototype.connect = function connect (callback) {
         }
 
         this._client = client;
-        this._client.setSecurity(new soap.BasicAuthSecurity(this._username, this._password));
-		this._client.addSoapHeader('<t:RequestServerVersion Version="Exchange' + this._exchangeVersoin + '" />');
+        if(this.ntlm){
+            this._client.setSecurity(new soap.NtlmSecurity(this._soapClientOptions.wsdl_options));  
+        }else{
+            this._client.setSecurity(new soap.BasicAuthSecurity(this._username, this._password));
+        }
+        this._client.addSoapHeader('<t:RequestServerVersion Version="Exchange' + this._exchangeVersoin + '" />');
 
         callback(null, true);
     }.bind(this), this._endpoint);
