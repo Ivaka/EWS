@@ -39,7 +39,8 @@ function EWS(config) {
             username: config.username,
             password:  this._password,
             workstation: "",
-            domain: config.domain
+            domain: config.domain,
+            rejectUnauthorized: false
         }
     }
 }
