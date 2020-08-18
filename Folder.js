@@ -88,7 +88,7 @@ Folder.prototype.getSyncState = function getSyncState() {
     return this._syncState;
 };
 
-Folder.prototype.FindItems = function (callback) {
+Folder.prototype.FindItems = function (query, callback) {
     var soapObj =  {
             attributes: {
                 Traversal: this._traversal
@@ -105,7 +105,8 @@ Folder.prototype.FindItems = function (callback) {
                     Offset: this._offset,
                     MaxEntriesReturned: this._maxEntriesReturned
                 }
-			}
+	    },
+	    QueryString : query
         };
 
 	if (!this._distinguished) {
